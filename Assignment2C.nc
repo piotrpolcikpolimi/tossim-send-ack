@@ -103,7 +103,7 @@ module Assignment2C {
     }
 
     event void AMControl.stopDone(error_t err){
-        /* Fill it ... */
+        dbg("boot","stopDone\n");
     }
 
     //***************** MilliTimer interface ********************//
@@ -145,6 +145,9 @@ module Assignment2C {
             if (msg_rec->type == 1) {
                 sendResp();
             }
+            if (msg_rec->type == 2) {
+                dbg("boot", "Recieved tmp value at mote %u is: %f\n", TOS_NODE_ID, ((double)msg_rec->value/65535)*100);
+            }
         }
         /* This event is triggered when a message is received 
          *
@@ -166,7 +169,7 @@ module Assignment2C {
             }
             msg->type = RESP;
             msg->counter = msg_rec->counter;
-            msg->value = value;
+            msg->value = data;
             call Ack.requestAck(&packet);
         if (call AMSend.send(1, &packet, sizeof(my_msg_t)) == SUCCESS) {
                 dbg("boot","Request sent, counter value %u\n", msg_rec->counter);
