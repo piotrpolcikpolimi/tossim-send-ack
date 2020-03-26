@@ -52,7 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Build files
-.simbuild/
+simbuild/
 *.xml
 *.so
 _DS_Store
