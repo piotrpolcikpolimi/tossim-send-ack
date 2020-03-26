@@ -71,7 +71,7 @@ module Assignment2C {
   //***************** AMControl interface ********************//
     event void AMControl.startDone(error_t err){
         if (err == SUCCESS) {
-            call MilliTimer.startPeriodic(MOTE_FREQ)
+            call MilliTimer.startPeriodic(MOTE_FREQ);
         } else {
             retryOrTimeout();
         }
