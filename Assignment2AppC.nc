@@ -22,9 +22,12 @@ implementation {
     /****** Wire the other interfaces down here *****/
     App.AMSend -> Sender;
     App.Packet -> Sender;
+    App.Ack -> Sender;
+
     App.Receive -> Receiver;
     App.AMControl -> ActiveMessageC;
     App.MilliTimer -> Timer;
+
 
     App.Read -> FakeSensorC;
 }

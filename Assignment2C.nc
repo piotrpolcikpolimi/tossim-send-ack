@@ -1,5 +1,3 @@
-#include <unistd.h>
-
 #include "Assignment2.h"
 #include "Timer.h"
 
@@ -11,9 +9,11 @@ module Assignment2C {
 
         interface Timer<TMilli> as MilliTimer;
         interface SplitControl as AMControl;
+        interface PacketAcknowledgements as Ack;
         interface AMSend;
         interface Receive;
         interface Packet;
+        
 
         //interface used to perform sensor reading (to get the value from a sensor)
         interface Read<uint16_t>;
@@ -23,9 +23,10 @@ module Assignment2C {
 
     uint8_t counter = 0;
     uint8_t rec_id;
+    bool locked = FALSE;
     message_t packet;
     uint8_t retryCounter = 0;
-    int i;
+    my_msg_t* msg_rec;
 
     void sendReq();
     void sendResp();
@@ -34,13 +35,24 @@ module Assignment2C {
 
     //***************** Send request function ********************//
     void sendReq() {
-        counter++;
-        my_msg_t* msg = (my_msg_t*)call Packet.getPayload(&packet, sizeof(my_msg_t));
-        msg->msg_type = REQ;
-        msg->msg_counter = counter;
-
-        call AMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(my_msg_t);
-        dbg("radio_send", "Sent request %u", counter);
+        if (locked) {
+            return;
+        } else {
+            my_msg_t* msg = (my_msg_t*)call Packet.getPayload(&packet, sizeof(my_msg_t));
+            if (msg == NULL) {
+                return;
+            }
+            msg->type = REQ;
+            msg->counter = counter;
+            
+            call Ack.requestAck(&packet);
+            if (call AMSend.send(2, &packet, sizeof(my_msg_t)) == SUCCESS) {
+                dbg("boot","Request sent, counter value %u\n", counter);
+                counter++;
+                locked = TRUE;
+            }    
+        }
+        
         /* This function is called when we want to send a request
          *
          * STEPS:
@@ -52,7 +64,7 @@ module Assignment2C {
          */
     }
 
-  //****************** Task send response *****************//
+    //****************** Task send response *****************//
     void sendResp() {
         /* This function is called when we receive the REQ message.
          * Nothing to do here. 
@@ -67,9 +79,11 @@ module Assignment2C {
         if (retryCounter < RADIO_START_TIMEOUT_LIMIT) {
             call AMControl.start();
         } else {
+            dbg("boot", "Stopping\n");
             call AMControl.stop();
         }
     }
+
 
   //***************** Boot interface ********************//
     event void Boot.booted() {
@@ -99,7 +113,17 @@ module Assignment2C {
 
 
     //********************* AMSend interface ****************//
-    event void AMSend.sendDone(message_t* buf,error_t err) {
+    event void AMSend.sendDone(message_t* buf, error_t err) {
+        if (&packet == buf && err == SUCCESS) {
+            locked = FALSE;
+        }
+        
+        if (call Ack.wasAcked(buf)) {
+            dbg("boot", "Msg acked\n");
+            call MilliTimer.stop();
+        } else {
+            dbg("boot", "Msg not acked\n");
+        }
         /* This event is triggered when a message is sent 
          *
          * STEPS:
@@ -113,6 +137,15 @@ module Assignment2C {
 
     //***************************** Receive interface *****************//
     event message_t* Receive.receive(message_t* buf,void* payload, uint8_t len) {
+        if (len != sizeof(my_msg_t)) {
+            return buf;
+        } else {
+            msg_rec = (my_msg_t*)payload;
+            dbg("boot", "counter value %u\n", msg_rec->counter);
+            if (msg_rec->type == 1) {
+                sendResp();
+            }
+        }
         /* This event is triggered when a message is received 
          *
          * STEPS:
@@ -126,7 +159,20 @@ module Assignment2C {
   //************************* Read interface **********************//
     event void Read.readDone(error_t result, uint16_t data) {
         double value = ((double)data/65535)*100;
+        my_msg_t* msg = (my_msg_t*)call Packet.getPayload(&packet, sizeof(my_msg_t));
         dbg("boot","temp read done %f\n",value);
+            if (msg == NULL) {
+                return;
+            }
+            msg->type = RESP;
+            msg->counter = msg_rec->counter;
+            msg->value = value;
+            call Ack.requestAck(&packet);
+        if (call AMSend.send(1, &packet, sizeof(my_msg_t)) == SUCCESS) {
+                dbg("boot","Request sent, counter value %u\n", msg_rec->counter);
+                counter++;
+                locked = TRUE;
+            } 
         /* This event is triggered when the fake sensor finish to read (after a Read.read()) 
          *
          * STEPS:
