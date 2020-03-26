@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "Assignment2.h"
 #include "Timer.h"
 
@@ -23,6 +25,7 @@ module Assignment2C {
     uint8_t rec_id;
     message_t packet;
     uint8_t retryCounter = 0;
+    int i;
 
     void sendReq();
     void sendResp();
@@ -71,7 +74,10 @@ module Assignment2C {
   //***************** AMControl interface ********************//
     event void AMControl.startDone(error_t err){
         if (err == SUCCESS) {
-            call MilliTimer.startPeriodic(MOTE_FREQ);
+            if (TOS_NODE_ID == 1) {
+                call MilliTimer.startPeriodic(MOTE_FREQ);
+            }
+            
         } else {
             retryOrTimeout();
         }
