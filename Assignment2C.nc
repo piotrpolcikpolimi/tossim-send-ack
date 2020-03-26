@@ -8,7 +8,7 @@ module Assignment2C {
         interface Boot; 
 
         interface Timer<TMilli> as MilliTimer;
-        interface SplitControl;
+        interface SplitControl as AMControl;
         interface AMSend;
         interface Receive;
         interface Packet;
@@ -19,12 +19,14 @@ module Assignment2C {
 
 } implementation {
 
-    uint8_t counter=0;
+    uint8_t counter = 0;
     uint8_t rec_id;
     message_t packet;
+    uint8_t retryCounter = 0;
 
     void sendReq();
     void sendResp();
+    void retryOrTimeout();
 
 
     //***************** Send request function ********************//
@@ -50,16 +52,29 @@ module Assignment2C {
         call Read.read();
     }
 
+    void retryOrTimeout() {
+        retryCounter++;
+        if (retryCounter < RADIO_START_TIMEOUT_LIMIT) {
+            call AMControl.start();
+        } else {
+            call AMControl.stop();
+        }
+    }
+
   //***************** Boot interface ********************//
     event void Boot.booted() {
-        dbg("boot","Application booted.\n");
-        sendResp();
+        dbg("boot","Device %u booted.\n", TOS_NODE_ID);
+        call AMControl.start();
         /* Fill it ... */
     }
 
   //***************** SplitControl interface ********************//
     event void SplitControl.startDone(error_t err){
-        /* Fill it ... */
+        if (err == SUCCESS) {
+            call MilliTimer.startPeriodic(MOTE_FREQ)
+        } else {
+            retryOrTimeout();
+        }
     }
 
     event void SplitControl.stopDone(error_t err){
@@ -68,10 +83,7 @@ module Assignment2C {
 
     //***************** MilliTimer interface ********************//
     event void MilliTimer.fired() {
-        /* This event is triggered every time the timer fires.
-         * When the timer fires, we send a request
-         * Fill this part...
-         */
+        dbg("timer_event", "Mote %u\n", TOS_NODE_ID);
     }
 
 

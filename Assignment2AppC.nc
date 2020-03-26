@@ -23,7 +23,7 @@ implementation {
     App.AMSend -> Sender;
     App.Packet -> Sender;
     App.Receive -> Receiver;
-    App.SplitControl -> ActiveMessageC;
+    App.AMControl -> ActiveMessageC;
     App.MilliTimer -> Timer;
 
     App.Read -> FakeSensorC;
