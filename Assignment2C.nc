@@ -68,8 +68,8 @@ module Assignment2C {
         /* Fill it ... */
     }
 
-  //***************** SplitControl interface ********************//
-    event void SplitControl.startDone(error_t err){
+  //***************** AMControl interface ********************//
+    event void AMControl.startDone(error_t err){
         if (err == SUCCESS) {
             call MilliTimer.startPeriodic(MOTE_FREQ)
         } else {
@@ -77,7 +77,7 @@ module Assignment2C {
         }
     }
 
-    event void SplitControl.stopDone(error_t err){
+    event void AMControl.stopDone(error_t err){
         /* Fill it ... */
     }
 
