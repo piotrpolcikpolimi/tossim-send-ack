@@ -34,6 +34,13 @@ module Assignment2C {
 
     //***************** Send request function ********************//
     void sendReq() {
+        counter++;
+        my_msg_t* msg = (my_msg_t*)call Packet.getPayload(&packet, sizeof(my_msg_t));
+        msg->msg_type = REQ;
+        msg->msg_counter = counter;
+
+        call AMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(my_msg_t);
+        dbg("radio_send", "Sent request %u", counter);
         /* This function is called when we want to send a request
          *
          * STEPS:
@@ -68,7 +75,6 @@ module Assignment2C {
     event void Boot.booted() {
         dbg("boot","Device %u booted.\n", TOS_NODE_ID);
         call AMControl.start();
-        /* Fill it ... */
     }
 
   //***************** AMControl interface ********************//
@@ -77,7 +83,6 @@ module Assignment2C {
             if (TOS_NODE_ID == 1) {
                 call MilliTimer.startPeriodic(MOTE_FREQ);
             }
-            
         } else {
             retryOrTimeout();
         }
@@ -89,7 +94,7 @@ module Assignment2C {
 
     //***************** MilliTimer interface ********************//
     event void MilliTimer.fired() {
-        dbg("timer_event", "Mote %u\n", TOS_NODE_ID);
+        sendReq();
     }
 
 
