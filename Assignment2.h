@@ -14,6 +14,7 @@ typedef nx_struct my_msg {
 enum {
     AM_MY_MSG = 6,
     MOTE_FREQ = 2000,
+    RADIO_START_TIMEOUT_LIMIT = 100
 };
 
 #endif
