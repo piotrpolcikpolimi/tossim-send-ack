@@ -15,7 +15,8 @@ implementation {
 /****** COMPONENTS *****/
   components MainC, sendAckC as App;
   //add the other components here
-
+  components new FakeSensorC();
+ 
 /****** INTERFACES *****/
   //Boot interface
   App.Boot -> MainC.Boot;

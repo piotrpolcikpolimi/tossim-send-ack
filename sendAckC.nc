@@ -15,9 +15,10 @@ module sendAckC {
   /****** INTERFACES *****/
 	interface Boot; 
 	
-    //interfaces for communication
-	//interface for timer
-    //other interfaces, if needed
+    interface Timer<TMilli> as MilliTimer;
+    interface SplitControl;
+    interface AMSend;
+    interface Receive;
 	
 	//interface used to perform sensor reading (to get the value from a sensor)
 	interface Read<uint16_t>;
@@ -116,5 +117,6 @@ module sendAckC {
 	 * X. Use debug statement showing what's happening (i.e. message fields)
 	 */
 
-}
+    }
+    }
 
