@@ -11,6 +11,7 @@ module Assignment2C {
         interface SplitControl;
         interface AMSend;
         interface Receive;
+        interface Packet;
 
         //interface used to perform sensor reading (to get the value from a sensor)
         interface Read<uint16_t>;

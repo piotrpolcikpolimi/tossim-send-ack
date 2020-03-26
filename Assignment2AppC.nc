@@ -8,13 +8,12 @@ implementation {
 /****** COMPONENTS *****/
     components MainC, ActiveMessageC;
 
-    components new AMSenderC(AM_ID) as Sender;
-    components new AMReceiverC(AM_ID) as Receiver;
+    components new AMSenderC(AM_MY_MSG) as Sender;
+    components new AMReceiverC(AM_MY_MSG) as Receiver;
     components new TimerMilliC() as Timer;
-    components Assignment2C as App;
-
-    //add the other components here
     components new FakeSensorC();
+
+    components Assignment2C as App;
 
 /****** INTERFACES *****/
     //Boot interface
@@ -24,8 +23,8 @@ implementation {
     App.AMSend -> Sender;
     App.Packet -> Sender;
     App.Receive -> Receiver;
-    App.AMControl -> ActiveMessageC;
-    App.MTimer -> Timer;
+    App.SplitControl -> ActiveMessageC;
+    App.MilliTimer -> Timer;
 
     App.Read -> FakeSensorC;
 }
