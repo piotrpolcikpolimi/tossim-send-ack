@@ -1,15 +1,15 @@
 /**
- *  Source file for implementation of module sendAckC in which
+ *  Source file for implementation of module Assignment2C in which
  *  the node 1 send a request to node 2 until it receives a response.
  *  The reply message contains a reading from the Fake Sensor.
  *
  *  @author Luca Pietro Borsani
  */
 
-#include "sendAck.h"
+#include "Assignment2.h"
 #include "Timer.h"
 
-module sendAckC {
+module Assignment2C {
 
   uses {
   /****** INTERFACES *****/

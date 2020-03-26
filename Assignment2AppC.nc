@@ -1,19 +1,19 @@
 /**
- *  Configuration file for wiring of sendAckC module to other common 
+ *  Configuration file for wiring of Assignment2C module to other common 
  *  components needed for proper functioning
  *
  *  @author Luca Pietro Borsani
  */
 
-#include "sendAck.h"
+#include "Assignment2.h"
 
-configuration sendAckAppC {}
+configuration Assignment2AppC {}
 
 implementation {
 
 
 /****** COMPONENTS *****/
-  components MainC, sendAckC as App;
+  components MainC, Assignment2C as App;
   //add the other components here
   components new FakeSensorC();
  
