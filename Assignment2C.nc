@@ -45,7 +45,7 @@ module Assignment2C {
 
             msg->type = REQ;
             msg->counter = counter;
-            dbg("role", "Creating message for mote %u. Type: %u, counter: %u\n", TOS_NODE_ID, REQ, counter);
+            dbg("role", "Preparing request for mote %u. Type: %u, counter: %u\n", TOS_NODE_ID, REQ, counter);
 
             call Ack.requestAck(&packet);
             if (call AMSend.send(2, &packet, sizeof(my_msg_t)) == SUCCESS) {
@@ -148,10 +148,11 @@ module Assignment2C {
             msg_rec = (my_msg_t*)payload;
             dbg("boot", "counter value %u\n", msg_rec->counter);
             if (msg_rec->type == 1) {
+                dbg("radio_rec", "Request received. Counter value: %u\n", msg_rec->counter);
                 sendResp();
             }
             if (msg_rec->type == 2) {
-                dbg("boot", "Recieved tmp value at mote %u is: %f\n", TOS_NODE_ID, ((double)msg_rec->value/65535)*100);
+                dbg("radio_rec", "Response received. Value is %f, counter is: %u\n", ((double)msg_rec->value/65535)*100, msg_rec->counter);
             }
         }
         /* This event is triggered when a message is received 
@@ -168,16 +169,15 @@ module Assignment2C {
     event void Read.readDone(error_t result, uint16_t data) {
         double value = ((double)data/65535)*100;
         my_msg_t* msg = (my_msg_t*)call Packet.getPayload(&packet, sizeof(my_msg_t));
-        dbg("boot","temp read done %f\n",value);
-            if (msg == NULL) {
-                return;
-            }
-            msg->type = RESP;
-            msg->counter = msg_rec->counter;
-            msg->value = data;
-            call Ack.requestAck(&packet);
+        if (msg == NULL) {
+            return;
+        }
+        msg->type = RESP;
+        msg->counter = msg_rec->counter;
+        msg->value = data;
+        dbg("role", "Preparing response for mote %u. Type: %u, counter: %u, value: %f\n.", TOS_NODE_ID, RESP, msg->counter, ((double)msg->value/65535)*100)
+        call Ack.requestAck(&packet);
         if (call AMSend.send(1, &packet, sizeof(my_msg_t)) == SUCCESS) {
-            dbg("boot","Request sent, counter value %u\n", msg_rec->counter);
         }
         /* This event is triggered when the fake sensor finish to read (after a Read.read()) 
          *
