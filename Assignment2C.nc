@@ -123,7 +123,7 @@ module Assignment2C {
         }
 
         if (msg->type == REQ) {
-            dbg("radio_send","Request sent, counter value %u\n", counter);
+            dbg("radio_send","Request sent, counter value %u\n", counter-1);
             if (wasAcked) {
                 dbg("radio_ack" , "Request was acked. Stoping the timer.\n");
             } else {
