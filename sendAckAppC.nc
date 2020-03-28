@@ -1,6 +1,6 @@
-#include "Assignment2.h"
+#include "sendAck.h"
 
-configuration Assignment2AppC {}
+configuration sendAckAppC {}
 
 implementation {
 
@@ -13,7 +13,7 @@ implementation {
     components new TimerMilliC() as Timer;
     components new FakeSensorC();
 
-    components Assignment2C as App;
+    components sendAckC as App;
 
 /****** INTERFACES *****/
     //Boot interface

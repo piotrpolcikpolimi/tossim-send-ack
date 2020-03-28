@@ -1,3 +1,3 @@
-COMPONENT=Assignment2AppC
+COMPONENT=sendAckAppC
 include $(MAKERULES)
 

@@ -1,7 +1,7 @@
-#include "Assignment2.h"
+#include "sendAck.h"
 #include "Timer.h"
 
-module Assignment2C {
+module sendAckC {
 
     uses {
         /****** INTERFACES *****/
