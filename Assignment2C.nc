@@ -126,6 +126,7 @@ module Assignment2C {
             dbg("radio_send","Request sent, counter value %u\n", counter-1);
             if (wasAcked) {
                 dbg("radio_ack" , "Request was acked. Stoping the timer.\n");
+                call MilliTimer.stop();
             } else {
                 dbg("radio_ack", "Request was not acked. Retrying.\n");
             }
@@ -174,7 +175,7 @@ module Assignment2C {
         msg->type = RESP;
         msg->counter = msg_rec->counter;
         msg->value = data;
-        dbg("role", "Preparing response for mote %u. Type: %u, counter: %u, value: %f\n.", TOS_NODE_ID, RESP, msg->counter, ((double)msg->value/65535)*100);
+        dbg("role", "Preparing response for mote %u. Type: %u, counter: %u, value: %f\n", TOS_NODE_ID, RESP, msg->counter, ((double)msg->value/65535)*100);
         call Ack.requestAck(&packet);
         if (call AMSend.send(1, &packet, sizeof(my_msg_t)) == SUCCESS) {
         }
