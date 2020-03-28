@@ -105,7 +105,13 @@ module Assignment2C {
         }
     }
 
+<<<<<<< HEAD
     event void AMControl.stopDone(error_t err) {}
+=======
+    event void AMControl.stopDone(error_t err){
+        dbg("boot","stopDone\n");
+    }
+>>>>>>> 142e5ca47b9af2ff66def7bc06cde147e991a1b7
 
     //***************** MilliTimer interface ********************//
     event void MilliTimer.fired() {
@@ -150,6 +156,9 @@ module Assignment2C {
             if (msg_rec->type == 1) {
                 sendResp();
             }
+            if (msg_rec->type == 2) {
+                dbg("boot", "Recieved tmp value at mote %u is: %f\n", TOS_NODE_ID, ((double)msg_rec->value/65535)*100);
+            }
         }
         /* This event is triggered when a message is received 
          *
@@ -166,6 +175,7 @@ module Assignment2C {
         double value = ((double)data/65535)*100;
         my_msg_t* msg = (my_msg_t*)call Packet.getPayload(&packet, sizeof(my_msg_t));
         dbg("boot","temp read done %f\n",value);
+<<<<<<< HEAD
         if (msg == NULL) {
             return;
         }
@@ -174,6 +184,15 @@ module Assignment2C {
         msg->value = value;
         call Ack.requestAck(&packet);
 
+=======
+            if (msg == NULL) {
+                return;
+            }
+            msg->type = RESP;
+            msg->counter = msg_rec->counter;
+            msg->value = data;
+            call Ack.requestAck(&packet);
+>>>>>>> 142e5ca47b9af2ff66def7bc06cde147e991a1b7
         if (call AMSend.send(1, &packet, sizeof(my_msg_t)) == SUCCESS) {
             dbg("boot","Request sent, counter value %u\n", msg_rec->counter);
         }
