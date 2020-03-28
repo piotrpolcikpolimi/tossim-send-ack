@@ -43,8 +43,6 @@ t.addChannel("radio",out);
 print "Activate debug message on channel radio_send"
 t.addChannel("radio_send",out);
 print "Activate debug message on channel radio_ack"
-t.addChannel("timer_event",out);
-print "Activate debug message on channel timer_event"
 t.addChannel("radio_ack",out);
 print "Activate debug message on channel radio_rec"
 t.addChannel("radio_rec",out);

@@ -42,15 +42,16 @@ module Assignment2C {
             if (msg == NULL) {
                 return;
             }
+
             msg->type = REQ;
             msg->counter = counter;
-            
+            dbg("role", "Creating message for mote %u. Type: %u, counter: %u\n", TOS_NODE_ID, REQ, counter);
+
             call Ack.requestAck(&packet);
             if (call AMSend.send(2, &packet, sizeof(my_msg_t)) == SUCCESS) {
-                dbg("boot","Request sent, counter value %u\n", counter);
                 counter++;
                 locked = TRUE;
-            }    
+            }
         }
         
         /* This function is called when we want to send a request
@@ -77,9 +78,10 @@ module Assignment2C {
     void retryOrTimeout() {
         retryCounter++;
         if (retryCounter < RADIO_START_TIMEOUT_LIMIT) {
+            dbgerror("radio", "Radio for device %u failed. Retrying.\n", TOS_NODE_ID);
             call AMControl.start();
         } else {
-            dbg("boot", "Stopping\n");
+            dbgerror("radio", "Radio for device %u failed. Terminating.\n", TOS_NODE_ID);
             call AMControl.stop();
         }
     }
@@ -94,6 +96,7 @@ module Assignment2C {
   //***************** AMControl interface ********************//
     event void AMControl.startDone(error_t err){
         if (err == SUCCESS) {
+            dbg("radio", "Radio for device %u started.\n", TOS_NODE_ID);
             if (TOS_NODE_ID == 1) {
                 call MilliTimer.startPeriodic(MOTE_FREQ);
             }
@@ -102,9 +105,7 @@ module Assignment2C {
         }
     }
 
-    event void AMControl.stopDone(error_t err){
-        /* Fill it ... */
-    }
+    event void AMControl.stopDone(error_t err) {}
 
     //***************** MilliTimer interface ********************//
     event void MilliTimer.fired() {
@@ -114,25 +115,29 @@ module Assignment2C {
 
     //********************* AMSend interface ****************//
     event void AMSend.sendDone(message_t* buf, error_t err) {
+        my_msg_t* msg = (my_msg_t*)call Packet.getPayload(&packet, sizeof(my_msg_t));
+        bool wasAcked = call Ack.wasAcked(buf);
+
         if (&packet == buf && err == SUCCESS) {
             locked = FALSE;
         }
-        
-        if (call Ack.wasAcked(buf)) {
-            dbg("boot", "Msg acked\n");
-            call MilliTimer.stop();
+
+        if (msg->type == REQ) {
+            dbg("radio_send","Request sent, counter value %u\n", counter);
+            if (wasAcked) {
+                dbg("radio_ack" , "Request was acked. Stoping the timer.\n");
+            } else {
+                dbg("radio_ack", "Request was not acked. Retrying.\n");
+            }
         } else {
-            dbg("boot", "Msg not acked\n");
+            dbg("radio_ack", "Response was sent.\n");
+            if (wasAcked) {
+                dbg("radio_ack", "Response was acked. Terminating\n");
+            } else {
+                dbg("radio_ack", "Response FAILED to be acked. Terminating\n");
+            }
+
         }
-        /* This event is triggered when a message is sent 
-         *
-         * STEPS:
-         * 1. Check if the packet is sent
-         * 2. Check if the ACK is received (read the docs)
-         * 2a. If yes, stop the timer. The program is done
-         * 2b. Otherwise, send again the request
-         * X. Use debug statements showing what's happening (i.e. message fields)
-         */
     }
 
     //***************************** Receive interface *****************//
@@ -161,18 +166,17 @@ module Assignment2C {
         double value = ((double)data/65535)*100;
         my_msg_t* msg = (my_msg_t*)call Packet.getPayload(&packet, sizeof(my_msg_t));
         dbg("boot","temp read done %f\n",value);
-            if (msg == NULL) {
-                return;
-            }
-            msg->type = RESP;
-            msg->counter = msg_rec->counter;
-            msg->value = value;
-            call Ack.requestAck(&packet);
+        if (msg == NULL) {
+            return;
+        }
+        msg->type = RESP;
+        msg->counter = msg_rec->counter;
+        msg->value = value;
+        call Ack.requestAck(&packet);
+
         if (call AMSend.send(1, &packet, sizeof(my_msg_t)) == SUCCESS) {
-                dbg("boot","Request sent, counter value %u\n", msg_rec->counter);
-                counter++;
-                locked = TRUE;
-            } 
+            dbg("boot","Request sent, counter value %u\n", msg_rec->counter);
+        }
         /* This event is triggered when the fake sensor finish to read (after a Read.read()) 
          *
          * STEPS:
