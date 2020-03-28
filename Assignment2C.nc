@@ -146,7 +146,6 @@ module Assignment2C {
             return buf;
         } else {
             msg_rec = (my_msg_t*)payload;
-            dbg("boot", "counter value %u\n", msg_rec->counter);
             if (msg_rec->type == 1) {
                 dbg("radio_rec", "Request received. Counter value: %u\n", msg_rec->counter);
                 sendResp();
