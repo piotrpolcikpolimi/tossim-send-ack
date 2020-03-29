@@ -117,7 +117,6 @@ module sendAckC {
                 dbg("radio_ack", "Request was not acked. Retrying.\n");
             }
         } else {
-            dbg("radio_ack", "Response was sent.\n");
             if (wasAcked) {
                 dbg("radio_ack", "Response was acked. Terminating\n");
             } else {
@@ -162,6 +161,7 @@ module sendAckC {
 
         call Ack.requestAck(&packet);
         if (call AMSend.send(1, &packet, sizeof(my_msg_t)) == SUCCESS) {
+            dbg("radio_ack", "Response was sent.\n");
         }
     }
 }
