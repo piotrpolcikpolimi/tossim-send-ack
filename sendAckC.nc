@@ -49,6 +49,7 @@ module sendAckC {
 
             call Ack.requestAck(&packet);
             if (call AMSend.send(2, &packet, sizeof(my_msg_t)) == SUCCESS) {
+                dbg("radio_send","Request sent, counter value %u\n", counter);
                 counter++;
                 locked = TRUE;
             }
@@ -109,7 +110,6 @@ module sendAckC {
         }
 
         if (msg->type == REQ) {
-            dbg("radio_send","Request sent, counter value %u\n", counter-1);
             if (wasAcked) {
                 dbg("radio_ack" , "Request was acked. Stoping the timer.\n");
                 call MilliTimer.stop();
